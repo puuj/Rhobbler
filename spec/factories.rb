@@ -5,7 +5,7 @@ FactoryGirl.define do
 
   factory :user do
     rhapsody_username  { Factory.next(:username) }
-    rhapsody_state     'unverified'
+    rhapsody_state     'inactive'
     lastfm_username    { Factory.next(:username) }
     lastfm_state       'unverified'
     session_key        'foo'

@@ -49,7 +49,41 @@ describe User do
       end
     end
 
+    describe "rhapsody_state validations" do
+      it "fails validation when state is explicitly nil" do
+        User.new(:rhapsody_state => nil).should have(2).errors_on(:rhapsody_state)
+      end
 
+      it "fails validation when invalid state" do
+        User.new(:rhapsody_state => 'foo').should have(1).errors_on(:rhapsody_state)
+      end
+
+      it "passes validation when no state is given" do
+        User.new.should have(0).errors_on(:rhapsody_state)
+      end
+
+      it "passes validation when state is explicitly set" do
+        User.new(:rhapsody_state => 'verified').should have(0).errors_on(:rhapsody_state)
+      end
+    end
+
+    describe "lastfm_state validations" do
+      it "fails validation when state is explicitly nil" do
+        User.new(:lastfm_state => nil).should have(2).errors_on(:lastfm_state)
+      end
+
+      it "fails validation when invalid state" do
+        User.new(:lastfm_state => 'foo').should have(1).errors_on(:lastfm_state)
+      end
+
+      it "passes validation when no state is given" do
+        User.new.should have(0).errors_on(:lastfm_state)
+      end
+
+      it "passes validation when state is explicitly set" do
+        User.new(:lastfm_state => 'verified').should have(0).errors_on(:lastfm_state)
+      end
+    end
 
     describe "session_key" do
       it "fails validation without a session_key" do
@@ -62,53 +96,95 @@ describe User do
     end
   end
 
-  [:rhapsody, :lastfm].each do |service|
-    describe "#{service}_state validations" do
-      it "fails validation when state is explicitly nil" do
-        User.new("#{service}_state" => nil).should have(2).errors_on("#{service}_state")
-      end
 
-      it "fails validation when invalid state" do
-        User.new("#{service}_state" => 'foo').should have(1).errors_on("#{service}_state")
-      end
-
-      it "passes validation when no state is given" do
-        User.new.should have(0).errors_on("#{service}_state")
-      end
-
-      it "passes validation when state is explicitly set" do
-        User.new("#{service}_state" => 'verified').should have(0).errors_on("#{service}_state")
-      end
-    end
-
-    describe "#{service} state" do
+  describe "rhapsody" do
+    describe "state" do
       it "should default to unverified" do
-        User.new.send("#{service}_state").should == "unverified"
+        User.new.rhapsody_state.should == "inactive"
       end
     end
 
-    describe "#{service} transitions" do
-      [:unverified, :unauthorized, :inactive].each do |state|
-        it "should verify from #{state}" do
-          u = build(:user, "#{service}_state" => state.to_s)
-          u.send("verify_#{service}!")
-          u.send("#{service}_state").should == "verified"
+    describe "transitions" do
+      describe "activate" do
+        let(:user) { Factory(:user, :rhapsody_state => "inactive") }
+
+        it "should move to unverified and queue a RhapsodyVerifyJob" do
+          RhapsodyVerifyJob.should_receive(:enqueue).once.with(user.id)
+          user.activate_rhapsody!
+          user.rhapsody_state.should == "unverified"
         end
       end
 
-      [:unverified, :verified].each do |state|
-        it "should deauthorize from #{state}" do
-          u = build(:user, "#{service}_state" => state.to_s)
-          u.send("deauthorize_#{service}!")
-          u.send("#{service}_state").should == "unauthorized"
+      describe "verify" do
+        [:unverified, :unauthorized, :inactive].each do |state|
+          let(:user) { build(:user, :rhapsody_state => state.to_s) }
+
+          it "should move to verified from #{state}" do
+            user.verify_rhapsody!
+            user.rhapsody_state.should == "verified"
+          end
         end
       end
 
-      [:unverified, :verified].each do |state|
-        it "should deactivate from #{state}" do
-          u = build(:user, "#{service}_state" => state.to_s)
-          u.send("deactivate_#{service}!")
-          u.send("#{service}_state").should == "inactive"
+      describe "deauthorize" do
+        [:unverified, :verified].each do |state|
+          let(:user) { build(:user, :rhapsody_state => state.to_s) }
+
+          it "should move to unauthorized from #{state}" do
+            user.deauthorize_rhapsody!
+            user.rhapsody_state.should == "unauthorized"
+          end
+        end
+      end
+
+      describe "deactivate" do
+        [:unverified, :verified].each do |state|
+          let(:user) { build(:user, :rhapsody_state => state.to_s) }
+
+          it "should deactivate from #{state}" do
+            user.deactivate_rhapsody!
+            user.rhapsody_state.should == "inactive"
+          end
+        end
+      end
+    end
+  end
+
+  describe "lastfm" do
+    describe "state" do
+      it "should default to unverified" do
+        User.new.lastfm_state.should == "unverified"
+      end
+    end
+
+    describe "transitions" do
+      describe "verify" do
+        [:unverified, :unauthorized, :inactive].each do |state|
+          let(:user) { build(:user, :lastfm_state => state.to_s) }
+          it "should verify from #{state}" do
+            user.verify_lastfm!
+            user.lastfm_state.should == "verified"
+          end
+        end
+      end
+
+      describe "deauthorize" do
+        [:unverified, :verified].each do |state|
+          let(:user) { build(:user, :lastfm_state => state.to_s) }
+          it "should deauthorize from #{state}" do
+            user.deauthorize_lastfm!
+            user.lastfm_state.should == "unauthorized"
+          end
+        end
+      end
+
+      describe "deactivate" do
+        [:unverified, :verified].each do |state|
+          let(:user) { build(:user, :lastfm_state => state.to_s) }
+          it "should deactivate from #{state}" do
+            user.deactivate_lastfm!
+            user.lastfm_state.should == "inactive"
+          end
         end
       end
     end

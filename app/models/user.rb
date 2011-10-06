@@ -1,7 +1,7 @@
 # This model represents a user of last.fm and Rhapsody.
 #
 # Fields:
-# rhapsody_username - String:            Rhapsody username / "member identifier" (eg "y35j1")
+# rhapsody_username - String           : Rhapsody username / "member identifier" (eg "y35j1")
 # lastfm_username   - String - not null: Last.fm username
 # session_key       - String - not null: Last.fm session key
 # rhapsody_state    - String - not null: State of the User's submission state for Rhapsody
@@ -13,9 +13,17 @@ class User < ActiveRecord::Base
   validates_presence_of :lastfm_username, :session_key, :rhapsody_state, :lastfm_state
   validates_uniqueness_of :rhapsody_username, :lastfm_username
 
-  state_machine :rhapsody_state, :namespace => 'rhapsody', :initial => :unverified do
+  state_machine :rhapsody_state, :namespace => 'rhapsody', :initial => :inactive do
+    event :activate do
+      transition :inactive => :unverified
+    end
+
+    after_transition :inactive => :unverified do |user|
+      RhapsodyVerifyJob.enqueue(user.id)
+    end
+
     event :verify do
-      transition all - [:verified] => :verified
+      transition [:unverified, :inactive, :unauthorized] => :verified
     end
 
     event :deauthorize do
@@ -27,12 +35,14 @@ class User < ActiveRecord::Base
     end
 
     # New user, have not yet validated Rhapsody access
-    state :unverified
+    state :unverified do
+      validates_presence_of :rhapsody_username
+    end
 
     # User with verified Rhapsody access
     state :verified
 
-    # User with an incorrect Rhapsody username
+    # User with an incorrect or blank Rhapsody username
     state :inactive
 
     # User with an unathorized Rhapsody listening history
@@ -41,7 +51,7 @@ class User < ActiveRecord::Base
 
   state_machine :lastfm_state, :namespace => 'lastfm', :initial => :unverified do
     event :verify do
-      transition all - [:verified] => :verified
+      transition [:unverified, :inactive, :unauthorized] => :verified
     end
 
     event :deauthorize do

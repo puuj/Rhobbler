@@ -1,6 +1,7 @@
 # This job attempts to fetch the Rhapsody listening history of a particular user
 # Depending on the success of the fetch, it updates the user accordingly
 #
+require 'rhapsody'
 class RhapsodyVerifyJob
   extend Resque::Plugins::Retry
 
@@ -21,7 +22,6 @@ class RhapsodyVerifyJob
     rescue InternalServerError
       user.deactivate_rhapsody!
       user.save
-      raise "Could find listening history for user #{user_id} with Rhapsody member ID of #{user.rhapsody_username}"
     end
   end
 end
