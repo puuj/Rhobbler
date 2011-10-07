@@ -17,6 +17,8 @@ class RhapsodyVerifyJob
     rescue RhapsodyUserNotAuthorizedError
       user.deauthorize_rhapsody!
       user.save
+
+      # Re-raise to automatically retry. Hopefully the user will authorize us soon.
       raise RhapsodyUserNotAuthorizedError,
         "Could not gain access to listening history for user #{user_id} with Rhapsody member ID of #{user.rhapsody_username}"
     rescue RhapsodyUserNotFoundError
@@ -25,7 +27,7 @@ class RhapsodyVerifyJob
     end
   end
 
-  def enqueue(user_id)
+  def self.enqueue(user_id)
     Resque.enqueue(self, user_id)
   end
 end
