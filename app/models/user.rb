@@ -22,8 +22,12 @@ class User < ActiveRecord::Base
       RhapsodyVerifyJob.enqueue(user.id)
     end
 
+    after_transition [:unverified, :unauthorized] => :verified do |user|
+      RhapsodyMergeTracksJob.enqueue(user.id)
+    end
+
     event :verify do
-      transition [:unverified, :inactive, :unauthorized] => :verified
+      transition [:unverified, :unauthorized] => :verified
     end
 
     event :deauthorize do

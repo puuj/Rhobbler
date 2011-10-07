@@ -116,10 +116,12 @@ describe User do
       end
 
       describe "verify" do
-        [:unverified, :unauthorized, :inactive].each do |state|
-          let(:user) { build(:user, :rhapsody_state => state.to_s) }
+        [:unverified, :unauthorized].each do |state|
+          let(:user) { Factory(:user, :rhapsody_state => state.to_s) }
 
           it "should move to verified from #{state}" do
+            RhapsodyMergeTracksJob.should_receive(:enqueue).once.with(user.id)
+
             user.verify_rhapsody!
             user.rhapsody_state.should == "verified"
           end

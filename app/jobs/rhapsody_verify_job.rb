@@ -3,6 +3,7 @@
 #
 class RhapsodyVerifyJob
   extend Resque::Plugins::Retry
+  extend Resque::Plugins::Enqueue
 
   @queue = :rhapsody
   @retry_delay = 60
@@ -26,8 +27,5 @@ class RhapsodyVerifyJob
       user.save
     end
   end
-
-  def self.enqueue(user_id)
-    Resque.enqueue(self, user_id)
-  end
 end
+
