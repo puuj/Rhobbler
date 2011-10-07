@@ -23,18 +23,25 @@ private
     doc = Nokogiri::HTML(content)
 
     date = Date.today
+    day = {}
     doc.css("tracks > *").each do |tag|
       if tag.name == "h4"
         date = Date.parse(tag.content)
         results[date] ||= {}
+        day = results[date]
       elsif tag.name == "ul"
         tag.css("li").each do |li|
-          # TODO: Add more elements to this hash if anybody needs them
-          results[date][li['track_name']] = {
-            :artist     => li['artist_name'],
-            :name       => li['track_name'],
-            :track_id   => li['track_id']
-          }
+          track_id = li['track_id']
+
+          if day.has_key?(track_id)
+            day[track_id][:count] += 1
+          else
+            results[date][li['track_id']] = {
+              :artist     => li['artist_name'],
+              :title      => li['track_name'],
+              :count      => 1
+            }
+          end
         end
       end
     end

@@ -6,7 +6,10 @@ class RhapsodyMergeTracksJob
     user = User.find(user_id)
 
     begin
-      response = Rhapsody.fetch_listening_history(user.rhapsody_username)
+      listens = Rhapsody.fetch_listening_history(user.rhapsody_username)
+      unless listens.empty?
+        Listen.merge(listens)
+      end
     rescue RhapsodyUserNotAuthorizedError
       # For some reason they've made their listening history private again.
       # Deauthorize them until they fix it.

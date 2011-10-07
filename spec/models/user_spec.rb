@@ -191,5 +191,64 @@ describe User do
       end
     end
   end
+
+  describe "merge_tracks" do
+    let(:user) { build(:user) }
+    let(:track) {
+      track = {
+        :date     => Date.today,
+        :track_id => "Tra.12345",
+        :title    => "Foo",
+        :artist   => "Bar",
+        :user_id  => user.id
+      }
+    }
+
+    it "should not call create if passed an empty hash" do
+      Listen.should_not_receive(:create)
+
+      user.merge_tracks({})
+    end
+
+    it "should simply merge one track" do
+      Listen.should_receive(:create).
+        once.with(track)
+
+      user.merge_tracks({
+        track[:date] => {
+          track[:track_id] => {
+            :title    => track[:title],
+            :artist   => track[:artist],
+            :count => 1
+          }
+        }
+      })
+    end
+
+    it "should merge a track with existing plays" do
+      user.save
+
+      3.times do
+        Listen.create(track)
+      end
+
+      2.times do
+        Listen.create(track.merge({:date => Date.yesterday}))
+      end
+
+      Listen.should_receive(:create).
+        twice.with(track)
+
+      user.merge_tracks({
+        track[:date] => {
+          track[:track_id] => {
+            :title    => track[:title],
+            :artist   => track[:artist],
+            :count => 5
+          }
+        }
+      })
+    end
+  end
 end
 

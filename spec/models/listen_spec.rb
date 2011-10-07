@@ -33,6 +33,26 @@ describe Listen do
       end
     end
 
+    describe "artist" do
+      it "fails validation when no artist" do
+        Listen.new.should have(1).errors_on(:artist)
+      end
+
+      it "passes validation when given artist" do
+        Listen.new(:artist => "12345").should have(0).errors_on(:artist)
+      end
+    end
+
+    describe "title" do
+      it "fails validation when no title" do
+        Listen.new.should have(1).errors_on(:title)
+      end
+
+      it "passes validation when given title" do
+        Listen.new(:title => "12345").should have(0).errors_on(:title)
+      end
+    end
+
     describe "date" do
       it "fails validation when no date" do
         Listen.new.should have(1).errors_on(:date)

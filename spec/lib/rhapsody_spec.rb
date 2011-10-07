@@ -33,16 +33,16 @@ describe Rhapsody do
 
       day.size.should eql(4)
 
-      [
-        "We Share Our Mothers' Health",
-        "The Captain",
-        "Neverland",
-        "Silent Shout"
-      ].each do |expected_track|
-        track = day[expected_track]
+      {
+        "We Share Our Mothers' Health" => 2,
+        "The Captain" => 1,
+        "Neverland" => 1,
+        "Silent Shout" => 1
+      }.each do |expected_track, count|
+        track = day.values.detect {|t| t[:title] == expected_track }
+        track.should_not be_nil
         track[:artist].should eql("The Knife")
-        track[:name].should   eql(expected_track)
-        track[:track_id].should =~ /Tra\.[0-9]*/
+        track[:count].should eql(count)
       end
     end
   end

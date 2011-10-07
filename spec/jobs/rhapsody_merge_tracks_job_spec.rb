@@ -6,16 +6,43 @@ describe RhapsodyMergeTracksJob do
   end
 
   describe "perform" do
-    let(:user) { Factory(:user, :rhapsody_state => 'verified') }
+    let(:user) { stub_model(User, :rhapsody_state => 'verified') }
+
+    before(:each) do
+      User.should_receive(:find).
+        once.with(user.id).
+        and_return(user)
+    end
 
     it "should not add any tracks if given an empty set of tracks" do
       Rhapsody.
         should_receive(:fetch_listening_history).
         once.with(user.rhapsody_username).
-        and_return({})
+        and_return([])
 
       RhapsodyMergeTracksJob.new.perform(user.id)
       Listen.count.should == 0
+    end
+
+    it "should add a listen if given data for it" do
+      track = {
+        :date    =>  Date.today,
+        :title    => "Test Track",
+        :track_id => "Tra.12345",
+        :artist   => "An Artist"
+      }
+      history = [track]
+
+      Rhapsody.
+        should_receive(:fetch_listening_history).
+        once.with(user.rhapsody_username).
+        and_return(history)
+
+      Listen.should_receive(:merge).
+        once.with(history).
+        and_return(true)
+
+      RhapsodyMergeTracksJob.new.perform(user.id)
     end
 
     it "should deauthorize user if RhapsodyUserNotAuthorizedError is raised" do
@@ -23,12 +50,11 @@ describe RhapsodyMergeTracksJob do
         should_receive(:fetch_listening_history).
         once.with(user.rhapsody_username).
         and_raise(RhapsodyUserNotAuthorizedError)
+      Listen.should_not_receive(:create)
+      user.should_receive(:deauthorize_rhapsody!).once
+      user.should_receive(:save).once
 
       RhapsodyMergeTracksJob.new.perform(user.id)
-      Listen.count.should == 0
-
-      user.reload
-      user.rhapsody_unauthorized?.should be_true
     end
   end
 

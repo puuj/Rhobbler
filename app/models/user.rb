@@ -78,5 +78,26 @@ class User < ActiveRecord::Base
     # User with an unathorized last.fm listening history
     state :unauthorized
   end
+
+  def merge_tracks(tracks)
+    tracks.each do |date, days_tracks|
+      days_tracks.each do |track_id, track|
+        count = listens.where(
+          :track_id => track_id,
+          :date => date
+        ).count
+
+        (track[:count] - count).times do
+          Listen.create({
+            :user_id  => id,
+            :date     => date,
+            :track_id => track_id,
+            :title    => track[:title],
+            :artist   => track[:artist]
+          })
+        end
+      end
+    end
+  end
 end
 
