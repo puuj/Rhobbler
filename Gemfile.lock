@@ -211,6 +211,7 @@ DEPENDENCIES
   rb-fsevent
   resque
   resque-retry
+  resque-scheduler
   resque_spec
   rockstar
   rspec-rails
