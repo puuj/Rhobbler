@@ -22,5 +22,11 @@ class Listen < ActiveRecord::Base
     state :unsubmitted
     state :submitted
   end
+
+  # It would be great to decouple this from persistence
+  after_create :submit_to_lastfm
+  def submit_to_lastfm
+    LastfmSubmissionJob.enqueue(self.id)
+  end
 end
 

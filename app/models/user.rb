@@ -14,16 +14,16 @@ class User < ActiveRecord::Base
   validates_uniqueness_of :rhapsody_username, :lastfm_username
 
   state_machine :rhapsody_state, :namespace => 'rhapsody', :initial => :inactive do
-    event :activate do
-      transition :inactive => :unverified
-    end
-
     after_transition :inactive => :unverified do |user|
       RhapsodyVerifyJob.enqueue(user.id)
     end
 
     after_transition [:unverified, :unauthorized] => :verified do |user|
       RhapsodyMergeTracksJob.enqueue(user.id)
+    end
+
+    event :activate do
+      transition :inactive => :unverified
     end
 
     event :verify do

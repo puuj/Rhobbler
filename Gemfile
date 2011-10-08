@@ -33,5 +33,6 @@ group :test do
   gem 'resque_spec'
   gem "spork", "> 0.9.0.rc"
   gem 'webmock'
+  gem 'timecop'
 end
 

@@ -193,7 +193,7 @@ describe User do
   end
 
   describe "merge_tracks" do
-    let(:user) { build(:user) }
+    let(:user) { Factory(:user) }
     let(:track) {
       track = {
         :date     => Date.today,
@@ -226,14 +226,12 @@ describe User do
     end
 
     it "should merge a track with existing plays" do
-      user.save
-
       3.times do
         Listen.create(track)
       end
 
       2.times do
-        Listen.create(track.merge({:date => Date.yesterday}))
+        Listen.create(track.merge({:date => 7.days.ago.to_date}))
       end
 
       Listen.should_receive(:create).

@@ -1,6 +1,6 @@
 FactoryGirl.define do
   sequence :username do |n|
-    n.to_s
+    "user_#{n}"
   end
 
   factory :user do
@@ -9,5 +9,11 @@ FactoryGirl.define do
     lastfm_username    { Factory.next(:username) }
     lastfm_state       'unverified'
     session_key        'foo'
+  end
+
+  factory :listen do
+    association :user
+    artist      'Some Artist'
+    title       'A Title'
   end
 end

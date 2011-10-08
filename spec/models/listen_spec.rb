@@ -81,5 +81,12 @@ describe Listen do
       end
     end
   end
+
+  it "enqueues LastfmSubmissionJob on submit_to_lastfm" do
+    listen = stub_model(Listen)
+    LastfmSubmissionJob.should_receive(:enqueue).
+      once.with(listen.id)
+    listen.submit_to_lastfm
+  end
 end
 
