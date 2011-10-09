@@ -9,40 +9,61 @@ describe RhapsodyMergeTracksJob do
     let(:user) { stub_model(User, :rhapsody_state => 'verified') }
 
     before(:each) do
+      Resque.redis.del(:delayed_queue_schedule)
       User.should_receive(:find).
         once.with(user.id).
         and_return(user)
     end
 
-    it "should not add any tracks if given an empty set of tracks" do
-      Rhapsody.
-        should_receive(:fetch_listening_history).
-        once.with(user.rhapsody_username).
-        and_return([])
+    describe "with an empty set of tracks" do
+      before(:each) do
+        Rhapsody.
+          should_receive(:fetch_listening_history).
+          once.with(user.rhapsody_username).
+          and_return([])
+      end
 
-      RhapsodyMergeTracksJob.new.perform(user.id)
-      Listen.count.should == 0
+      it "should not call Listen.merge" do
+        Listen.should_not_receive(:merge)
+        RhapsodyMergeTracksJob.new.perform(user.id)
+      end
+
+      it "should add an item to the delayed queue 1 hour from now" do
+        Timecop.freeze do
+          RhapsodyMergeTracksJob.new.perform(user.id)
+          time = Resque.redis.zrange(:delayed_queue_schedule, 0, 1).first
+          time.to_i.should eql(1.hour.from_now.to_i)
+        end
+      end
     end
 
-    it "should add a listen if given data for it" do
-      track = {
-        :date    =>  Date.today,
-        :title    => "Test Track",
-        :track_id => "Tra.12345",
-        :artist   => "An Artist"
-      }
-      history = [track]
+    describe "with a single track" do
+      let(:tracks) { ["I AM NOT EMPTY"] }
 
-      Rhapsody.
-        should_receive(:fetch_listening_history).
-        once.with(user.rhapsody_username).
-        and_return(history)
+      before(:each) do
+        Rhapsody.
+          should_receive(:fetch_listening_history).
+          once.with(user.rhapsody_username).
+          and_return(tracks)
+      end
 
-      Listen.should_receive(:merge).
-        once.with(history).
-        and_return(true)
+      it "should call Listen.merge" do
+        Listen.should_receive(:merge).
+          once.with(tracks).
+          and_return(true)
 
-      RhapsodyMergeTracksJob.new.perform(user.id)
+        RhapsodyMergeTracksJob.new.perform(user.id)
+      end
+
+      it "should add an item to the delayed queue 10 minutes from now" do
+        Listen.stub(:merge)
+
+        Timecop.freeze do
+          RhapsodyMergeTracksJob.new.perform(user.id)
+          time = Resque.redis.zrange(:delayed_queue_schedule, 0, 1).first
+          time.to_i.should eql(10.minutes.from_now.to_i)
+        end
+      end
     end
 
     it "should deauthorize user if RhapsodyUserNotAuthorizedError is raised" do

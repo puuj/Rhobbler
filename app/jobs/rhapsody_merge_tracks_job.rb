@@ -7,7 +7,12 @@ class RhapsodyMergeTracksJob
 
     begin
       listens = Rhapsody.fetch_listening_history(user.rhapsody_username)
-      unless listens.empty?
+
+      if listens.empty?
+        Resque.enqueue_in(1.hour, RhapsodyMergeTracksJob, user_id)
+      else
+        # If they're listening right now, requeue them sooner
+        Resque.enqueue_in(10.minutes, RhapsodyMergeTracksJob, user_id)
         Listen.merge(listens)
       end
     rescue RhapsodyUserNotAuthorizedError
