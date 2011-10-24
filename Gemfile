@@ -8,6 +8,8 @@ gem 'unicorn'
 
 gem 'nokogiri'
 gem 'rockstar'
+gem 'mustache'
+gem 'stache'
 gem 'resque'
 gem 'resque-retry'
 gem 'resque-scheduler'
@@ -25,6 +27,7 @@ group :development, :test do
 end
 
 group :test do
+  gem "capybara"
   gem 'factory_girl_rails'
   gem "guard-rspec"
   gem "guard-spork"
