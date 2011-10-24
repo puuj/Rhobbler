@@ -1,0 +1,30 @@
+<form action='/users' method='POST'>
+  <input type='hidden' name="user[session_key]" id="user_session_key" value="{{session_key}}">
+
+  <input type='hidden' name="user[lastfm_username]" id="user_lastfm_username" value="{{lastfm_username}}">
+
+  <p>Hey {{lastfm_username}}! You're almost ready to start using Rhobbler. Before we can start, we need to help you configure Rhapsody:</p>
+
+  <ul>
+    <li>Go to <a href="http://rhapsody.com/" target="_blank">http://rhapsody.com/</a></li>
+    <li>
+      Under "My Music", click "Profile".
+      {{{instruction_image_1}}}
+    </li>
+    <li>
+      Click "Edit Profile".
+      {{{instruction_image_2}}}
+    </li>
+    <li>
+      Ensure that "Share Profile" is checked. Copy your Member ID. Click Save.
+      {{{instruction_image_3}}}
+    </li>
+    <li>
+      <label for="user_rhapsody_username">Finally, paste your Member ID here</label>:
+      <input type='hidden' name='user[rhapsody_state]' value='unverified' />
+      <input type='text' name="user[rhapsody_username]" id="user_rhapsody_username" value="{{rhapsody_username}}">
+    </li>
+  </p>
+
+  <input type="submit" value="Start Rhobbler!">
+</form>
