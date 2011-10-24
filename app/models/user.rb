@@ -79,6 +79,24 @@ class User < ActiveRecord::Base
     state :unauthorized
   end
 
+  def self.find_or_create_by_token(token)
+    session = Rockstar::Auth.new.session(token)
+
+    # There's a minor risk of a race condition here, but that's OK I
+    # think
+    if user = User.where(:lastfm_username => session.username).first
+      user.session_key = session.key
+      user.save
+    else
+      user = User.create(
+        :lastfm_username => session.username,
+        :session_key     => session.key
+      )
+    end
+
+    return user
+  end
+
   def merge_tracks(tracks)
     tracks.each do |date, days_tracks|
       days_tracks.each do |track_id, track|
