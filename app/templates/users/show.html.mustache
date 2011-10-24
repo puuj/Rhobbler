@@ -1,0 +1,50 @@
+{{#user}}
+<h2>Rhapsody Connection</h2>
+<div id="rhapsody_state" class="{{rhapsody_state}}">
+  {{#rhapsody_unverified?}}
+    We are currently attempting to connect to <b>{{rhapsody_username}}</b>'s listening history. Please wait...
+  {{/rhapsody_unverified?}}
+
+  {{#rhapsody_verified?}}
+    We are connected and able to pull tracks from <b>{{rhapsody_username}}</b>'s listening history.
+  {{/rhapsody_verified?}}
+
+  {{#rhapsody_unauthorized?}}
+    We are unable to view <b>{{rhapsody_username}}</b>'s listening history.
+    Please make sure the "Share Profile" checkbox is checked in your Rhapsody profile.
+  {{/rhapsody_unauthorized?}}
+
+  {{#rhapsody_inactive?}}
+    We could not find a Rhapsody user with the username of <b>{{rhapsody_username}}</b>.
+    Please copy the member ID as shown
+    {{instruction_image_3}}
+    and paste it here:
+    <form action='{{form_action}}' method='POST'>
+      <input type='hidden' name='_method' value='PUT' />
+      <input type='hidden' name='user[rhapsody_state]' value='unverified' />
+      <input type='text'   name='user[rhapsody_username]' id='user_rhapsody_username' />
+      <input type='submit' value='Try Again' />
+    </form>
+  {{/rhapsody_inactive?}}
+</div>
+
+<h2>Last.fm Connection</h2>
+<div id="lastfm_state" class="{{lastfm_state}}">
+  {{#lastfm_unverified?}}
+    We are currently attempting to connect to <b>{{lastfm_username}}</b>'s Last.fm profile. Please wait...
+  {{/lastfm_unverified?}}
+
+  {{#lastfm_verified?}}
+    We are connected and able to scrobble to <b>{{lastfm_username}}</b>'s profile.
+  {{/lastfm_verified?}}
+
+  {{#lastfm_unauthorized?}}
+    {{> lastfm_reauthorize}}
+  {{/lastfm_unauthorized?}}
+
+  {{#lastfm_inactive?}}
+    {{> lastfm_reauthorize}}
+  {{/lastfm_inactive?}}
+</div>
+{{/user}}
+
