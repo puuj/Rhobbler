@@ -15,7 +15,7 @@ describe RhapsodyMergeTracksJob do
         and_return(user)
     end
 
-    describe "with an empty set of tracks" do
+    describe "with an empty set of listens" do
       before(:each) do
         Rhapsody.
           should_receive(:fetch_listening_history).
@@ -23,8 +23,8 @@ describe RhapsodyMergeTracksJob do
           and_return([])
       end
 
-      it "should not call Listen.merge" do
-        Listen.should_not_receive(:merge)
+      it "should not call User.merge_listens" do
+        user.should_not_receive(:merge_listens)
         RhapsodyMergeTracksJob.new.perform(user.id)
       end
 
@@ -38,25 +38,25 @@ describe RhapsodyMergeTracksJob do
     end
 
     describe "with a single track" do
-      let(:tracks) { ["I AM NOT EMPTY"] }
+      let(:listens) { ["I AM NOT EMPTY"] }
 
       before(:each) do
         Rhapsody.
           should_receive(:fetch_listening_history).
           once.with(user.rhapsody_username).
-          and_return(tracks)
+          and_return(listens)
       end
 
-      it "should call Listen.merge" do
-        Listen.should_receive(:merge).
-          once.with(tracks).
+      it "should call user.merge_listens" do
+        user.should_receive(:merge_listens).
+          once.with(listens).
           and_return(true)
 
         RhapsodyMergeTracksJob.new.perform(user.id)
       end
 
       it "should add an item to the delayed queue 10 minutes from now" do
-        Listen.stub(:merge)
+        user.stub(:merge_listens)
 
         Timecop.freeze do
           RhapsodyMergeTracksJob.new.perform(user.id)

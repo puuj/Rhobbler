@@ -97,24 +97,12 @@ class User < ActiveRecord::Base
     return user
   end
 
-  def merge_tracks(tracks)
-    tracks.each do |date, days_tracks|
-      days_tracks.each do |track_id, track|
-        count = listens.where(
-          :track_id => track_id,
-          :date => date
-        ).count
-
-        (track[:count] - count).times do
-          Listen.create({
-            :user_id  => id,
-            :date     => date,
-            :track_id => track_id,
-            :title    => track[:title],
-            :artist   => track[:artist]
-          })
-        end
-      end
+  # Takes an array of hahses of listen data (from Rhapsody module) and creates
+  # Listen records accordingly
+  def merge_listens(listens)
+    listens.each do |listen|
+      listen[:user_id] = id
+      Listen.find_or_create_by_user_id_and_track_id_and_played_at(listen)
     end
   end
 end

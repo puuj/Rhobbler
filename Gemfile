@@ -6,13 +6,13 @@ gem 'rack', '1.3.3'
 gem 'rails', '3.1.0'
 gem 'unicorn'
 
-gem 'nokogiri'
-gem 'rockstar'
+gem 'json'
 gem 'mustache'
 gem 'stache'
 gem 'resque'
 gem 'resque-retry'
 gem 'resque-scheduler'
+gem 'rockstar'
 gem 'state_machine'
 
 group :assets do

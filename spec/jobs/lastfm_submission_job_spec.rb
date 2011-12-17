@@ -6,28 +6,41 @@ describe LastfmSubmissionJob do
   end
 
   describe "perform" do
-    let(:user) { build(:user, :lastfm_state => 'verified') }
-    let(:listen) { build(:listen, :user => user) }
+    let(:user) { Factory(:user, :lastfm_state => 'verified') }
+    let(:listen) { Factory(:listen, :user => user) }
 
     before(:each) do
-      Listen.should_receive(:find).
-        once.with(listen.id).
-        and_return(listen)
+      Timecop.freeze(Time.now)
+      track_mock = mock(Rockstar::Track)
+      track_mock.should_receive(:scrobble).
+        once.with(Time.now, user.session_key).
+        and_return("success")
+
+      Rockstar::Track.
+        should_receive(:new).
+        once.with(listen.artist, listen.title).
+        and_return(track_mock)
+    end
+
+    after(:each) do
+      Timecop.return
     end
 
     it "should attempt to scrobble" do
-      Timecop.freeze do
-        track_mock = mock(Rockstar::Track)
-        track_mock.should_receive(:scrobble).
-          once.with(Time.now, user.session_key)
+      LastfmSubmissionJob.new.perform(listen.id).should == "success"
+    end
 
-        Rockstar::Track.
-          should_receive(:new).
-          once.with(listen.artist, listen.title).
-          and_return(track_mock)
+    it "should update user" do
+      LastfmSubmissionJob.new.perform(listen.id)
 
-        LastfmSubmissionJob.new.perform(listen.id)
-      end
+      user.lastfm_verified?.should be_true
+    end
+
+    it "should update track" do
+      LastfmSubmissionJob.new.perform(listen.id)
+
+      listen.reload
+      listen.submitted?.should be_true
     end
   end
 

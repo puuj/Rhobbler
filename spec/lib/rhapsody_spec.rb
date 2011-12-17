@@ -2,21 +2,21 @@ require "spec_helper"
 
 describe Rhapsody do
   let(:username) { "anyusername" }
-  let(:valid_body) { File.read(File.join(Rails.root, "spec", "fixtures", "listening_history.html")) }
+  let(:valid_body) { File.read(File.join(Rails.root, "spec", "fixtures", "listening_history.json")) }
 
   it "should give a response if 200" do
-    stub_request(:get, "http://www.rhapsody.com/members/#{username}/listening_history?timezoneOffset=0").
+    stub_request(:get, "http://www.rhapsody.com/members/#{username}/listening_history.json").
       to_return(
-        :body => "anything",
+        :body => "[]",
         :status => 200,
       )
 
-    Rhapsody.fetch_listening_history(username).should eql({})
+    Rhapsody.fetch_listening_history(username).should eql([])
   end
 
   describe "response format" do
     before(:each) do
-      stub_request(:get, "http://www.rhapsody.com/members/#{username}/listening_history?timezoneOffset=0").
+      stub_request(:get, "http://www.rhapsody.com/members/#{username}/listening_history.json").
         to_return(
           :body => valid_body,
           :status => 200,
@@ -24,31 +24,22 @@ describe Rhapsody do
       @result = Rhapsody.fetch_listening_history(username)
     end
 
-    it "should contain 12 results" do
-      @result.size.should eql(12)
+    it "should contain 149 results" do
+      @result.size.should eql(149)
     end
 
-    it "should say that on August 5th I listened to a bunch of The Knife" do
-      day = @result[Date.parse("August 5th 2011")]
+    it "contains two listens for Heaven's On Fire" do
+      listens = @result.select {|t| t[:title] == "Heaven's On Fire" }
 
-      day.size.should eql(4)
+      listens.should_not be_nil
+      listens.size.should == 2
 
-      {
-        "We Share Our Mothers' Health" => 2,
-        "The Captain" => 1,
-        "Neverland" => 1,
-        "Silent Shout" => 1
-      }.each do |expected_track, count|
-        track = day.values.detect {|t| t[:title] == expected_track }
-        track.should_not be_nil
-        track[:artist].should eql("The Knife")
-        track[:count].should eql(count)
-      end
+      listens.first[:artist].should eql("The Radio Dept.")
     end
   end
 
   it "should throw RhapsodyUserNotAuthorizedError if 404" do
-    stub_request(:get, "http://www.rhapsody.com/members/#{username}/listening_history?timezoneOffset=0").
+    stub_request(:get, "http://www.rhapsody.com/members/#{username}/listening_history.json").
       to_return(
         :body => "anything",
         :status => 404,
@@ -60,7 +51,7 @@ describe Rhapsody do
   end
 
   it "should throw RhapsodyUserNotFoundError if 500" do
-    stub_request(:get, "http://www.rhapsody.com/members/#{username}/listening_history?timezoneOffset=0").
+    stub_request(:get, "http://www.rhapsody.com/members/#{username}/listening_history.json").
       to_return(
         :body => "anything",
         :status => 500,

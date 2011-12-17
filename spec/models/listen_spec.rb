@@ -53,13 +53,33 @@ describe Listen do
       end
     end
 
-    describe "date" do
-      it "fails validation when no date" do
-        Listen.new.should have(1).errors_on(:date)
+    describe "played_at" do
+      it "fails validation when no played_at" do
+        Listen.new.should have(1).errors_on(:played_at)
       end
 
-      it "passes validation when given date" do
-        Listen.new(:date => Date.today).should have(0).errors_on(:date)
+      it "passes validation when given played_at" do
+        Listen.new(:played_at => Time.now).should have(0).errors_on(:played_at)
+      end
+
+      describe "uniqueness" do
+        let(:original) { original = Factory(:listen) }
+
+        it "fails validation when another record with same played_at, user_id, track_id combo" do
+          Listen.new(
+            :played_at => original.played_at,
+            :user_id => original.user_id,
+            :track_id => original.track_id
+          ).should have(1).errors_on(:played_at)
+        end
+
+        it "passes validation when another record with same user_id, track_id combo" do
+          Listen.new(
+            :played_at => original.played_at + 1.second,
+            :user_id => original.user_id,
+            :track_id => original.track_id
+          ).should have(0).errors_on(:played_at)
+        end
       end
     end
 
@@ -78,6 +98,12 @@ describe Listen do
 
       it "passes validation when state is explicitly set" do
         Listen.new(:state => 'submitted').should have(0).errors_on(:state)
+      end
+
+      it "moves to submitted upon submit event" do
+        listen = Factory(:listen, :state => 'unsubmitted')
+        listen.submit!
+        listen.submitted?.should be_true
       end
     end
   end

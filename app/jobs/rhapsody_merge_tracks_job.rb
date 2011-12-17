@@ -13,7 +13,7 @@ class RhapsodyMergeTracksJob
       else
         # If they're listening right now, requeue them sooner
         Resque.enqueue_in(10.minutes, RhapsodyMergeTracksJob, user_id)
-        Listen.merge(listens)
+        user.merge_listens(listens)
       end
     rescue RhapsodyUserNotAuthorizedError
       # For some reason they've made their listening history private again.

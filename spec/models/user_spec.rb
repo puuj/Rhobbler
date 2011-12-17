@@ -225,60 +225,28 @@ describe User do
     end
   end
 
-  describe "merge_tracks" do
+  describe "merge_listens" do
     let(:user) { Factory(:user) }
-    let(:track) {
-      track = {
-        :date     => Date.today,
-        :track_id => "Tra.12345",
-        :title    => "Foo",
-        :artist   => "Bar",
-        :user_id  => user.id
+    let(:listen) {
+      {
+        :played_at => Time.now,
+        :track_id  => "Tra.12345",
+        :title     => "Foo",
+        :artist    => "Bar",
       }
     }
 
     it "should not call create if passed an empty hash" do
       Listen.should_not_receive(:create)
 
-      user.merge_tracks({})
+      user.merge_listens({})
     end
 
-    it "should simply merge one track" do
-      Listen.should_receive(:create).
-        once.with(track)
+    it "should simply merge one listen" do
+      Listen.should_receive(:find_or_create_by_user_id_and_track_id_and_played_at).
+        once.with(listen.merge(:user_id => user.id))
 
-      user.merge_tracks({
-        track[:date] => {
-          track[:track_id] => {
-            :title    => track[:title],
-            :artist   => track[:artist],
-            :count => 1
-          }
-        }
-      })
-    end
-
-    it "should merge a track with existing plays" do
-      3.times do
-        Listen.create(track)
-      end
-
-      2.times do
-        Listen.create(track.merge({:date => 7.days.ago.to_date}))
-      end
-
-      Listen.should_receive(:create).
-        twice.with(track)
-
-      user.merge_tracks({
-        track[:date] => {
-          track[:track_id] => {
-            :title    => track[:title],
-            :artist   => track[:artist],
-            :count => 5
-          }
-        }
-      })
+      user.merge_listens([listen])
     end
   end
 end
