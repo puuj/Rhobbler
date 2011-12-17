@@ -2,8 +2,7 @@ source 'http://rubygems.org'
 
 gem 'jquery-rails'
 gem 'pg'
-gem 'rack', '1.3.3'
-gem 'rails', '3.1.0'
+gem 'rails', '3.1.3'
 gem 'unicorn'
 
 gem 'json'
