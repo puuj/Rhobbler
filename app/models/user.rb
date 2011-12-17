@@ -14,10 +14,12 @@ class User < ActiveRecord::Base
   validates_uniqueness_of :rhapsody_username, :lastfm_username
 
   state_machine :rhapsody_state, :namespace => 'rhapsody', :initial => :inactive do
+    # After a user is signed up, attempt to verify their rhapsody username
     after_transition :inactive => :unverified do |user|
       RhapsodyVerifyJob.enqueue(user.id)
     end
 
+    # After a user is verified, start fetching listening data
     after_transition [:unverified, :unauthorized] => :verified do |user|
       RhapsodyMergeTracksJob.enqueue(user.id)
     end
@@ -79,11 +81,11 @@ class User < ActiveRecord::Base
     state :unauthorized
   end
 
+  # Find (for login) or create (for registration) by a session token passed from last.fm
   def self.find_or_create_by_token(token)
     session = Rockstar::Auth.new.session(token)
 
-    # There's a minor risk of a race condition here, but that's OK I
-    # think
+    # There's a minor risk of a race condition here, but that's OK I think
     if user = User.where(:lastfm_username => session.username).first
       user.session_key = session.key
       user.save

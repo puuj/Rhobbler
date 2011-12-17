@@ -19,11 +19,13 @@ module Rhapsody
   end
 
 private
+  # Listening history JSON file is an array of hashes
   def self.parse_listening_history(content)
     JSON.parse(content).map do |listen|
       {
-        :track_id  => listen["trackPlayed"]["trackId"],
         :played_at => Time.parse(listen["timePlayed"]),
+        # track information is in a hash within this hash. No idea why they did that.
+        :track_id  => listen["trackPlayed"]["trackId"],
         :title     => listen["trackPlayed"]["name"],
         :artist    => listen["trackPlayed"]["displayArtistName"]
       }
