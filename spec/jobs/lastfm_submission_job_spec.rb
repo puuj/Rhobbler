@@ -31,8 +31,10 @@ describe LastfmSubmissionJob do
     end
 
     it "should update user" do
+      user.deactivate_lastfm!
       LastfmSubmissionJob.new.perform(listen.id)
 
+      user.reload
       user.lastfm_verified?.should be_true
     end
 

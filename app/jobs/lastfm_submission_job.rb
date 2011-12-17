@@ -9,7 +9,7 @@ class LastfmSubmissionJob
       # Will raise error if lastfm fails
       status = track.scrobble(Time.now, listen.user.session_key)
       listen.submit!
-      listen.track.verify_lastfm!
+      listen.user.verify_lastfm!
     rescue
     end
 
