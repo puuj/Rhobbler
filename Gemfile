@@ -31,7 +31,6 @@ group :test do
   gem 'factory_girl_rails'
   gem "guard-rspec"
   gem "guard-spork"
-  gem 'growl_notify'
   gem 'rb-fsevent'
   gem 'resque_spec'
   gem "spork", "> 0.9.0.rc"
