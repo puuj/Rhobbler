@@ -8,6 +8,7 @@ gem 'unicorn'
 
 gem 'json'
 gem 'mustache'
+gem 'mustang'
 gem 'stache'
 gem 'resque'
 gem 'resque-retry'
