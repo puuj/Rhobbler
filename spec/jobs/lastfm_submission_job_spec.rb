@@ -27,19 +27,19 @@ describe LastfmSubmissionJob do
     end
 
     it "should attempt to scrobble" do
-      LastfmSubmissionJob.new.perform(listen.id).should == "success"
+      LastfmSubmissionJob.perform(listen.id).should == "success"
     end
 
     it "should update user" do
       user.deactivate_lastfm!
-      LastfmSubmissionJob.new.perform(listen.id)
+      LastfmSubmissionJob.perform(listen.id)
 
       user.reload
       user.lastfm_verified?.should be_true
     end
 
     it "should update track" do
-      LastfmSubmissionJob.new.perform(listen.id)
+      LastfmSubmissionJob.perform(listen.id)
 
       listen.reload
       listen.submitted?.should be_true

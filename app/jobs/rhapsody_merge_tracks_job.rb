@@ -4,7 +4,7 @@ class RhapsodyMergeTracksJob
   extend Resque::Plugins::Enqueue
 
   # One job per user
-  def perform(user_id)
+  def self.perform(user_id)
     user = User.find(user_id)
 
     begin

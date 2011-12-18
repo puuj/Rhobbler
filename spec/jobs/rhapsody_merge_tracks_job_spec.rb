@@ -25,12 +25,12 @@ describe RhapsodyMergeTracksJob do
 
       it "should not call User.merge_listens" do
         user.should_not_receive(:merge_listens)
-        RhapsodyMergeTracksJob.new.perform(user.id)
+        RhapsodyMergeTracksJob.perform(user.id)
       end
 
       it "should add an item to the delayed queue 1 hour from now" do
         Timecop.freeze do
-          RhapsodyMergeTracksJob.new.perform(user.id)
+          RhapsodyMergeTracksJob.perform(user.id)
           time = Resque.redis.zrange(:delayed_queue_schedule, 0, 1).first
           time.to_i.should eql(1.hour.from_now.to_i)
         end
@@ -52,14 +52,14 @@ describe RhapsodyMergeTracksJob do
           once.with(listens).
           and_return(true)
 
-        RhapsodyMergeTracksJob.new.perform(user.id)
+        RhapsodyMergeTracksJob.perform(user.id)
       end
 
       it "should add an item to the delayed queue 10 minutes from now" do
         user.stub(:merge_listens)
 
         Timecop.freeze do
-          RhapsodyMergeTracksJob.new.perform(user.id)
+          RhapsodyMergeTracksJob.perform(user.id)
           time = Resque.redis.zrange(:delayed_queue_schedule, 0, 1).first
           time.to_i.should eql(10.minutes.from_now.to_i)
         end
@@ -75,7 +75,7 @@ describe RhapsodyMergeTracksJob do
       user.should_receive(:deauthorize_rhapsody!).once
       user.should_receive(:save).once
 
-      RhapsodyMergeTracksJob.new.perform(user.id)
+      RhapsodyMergeTracksJob.perform(user.id)
     end
   end
 

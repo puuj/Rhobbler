@@ -12,7 +12,7 @@ describe RhapsodyVerifyJob do
       Rhapsody.should_receive(:fetch_listening_history).once.
         with(user.rhapsody_username).
         and_return("success")
-      RhapsodyVerifyJob.new.perform(user.id)
+      RhapsodyVerifyJob.perform(user.id)
 
       user.rhapsody_verified?.should be_true
     end
@@ -23,7 +23,7 @@ describe RhapsodyVerifyJob do
         and_raise(RhapsodyUserNotAuthorizedError)
 
       lambda {
-        RhapsodyVerifyJob.new.perform(user.id)
+        RhapsodyVerifyJob.perform(user.id)
       }.should raise_error(
         RhapsodyUserNotAuthorizedError,
         "Could not gain access to listening history for user #{user.id} with Rhapsody member ID of #{user.rhapsody_username}"
@@ -36,7 +36,7 @@ describe RhapsodyVerifyJob do
       Rhapsody.should_receive(:fetch_listening_history).once.
         with(user.rhapsody_username).
         and_raise(RhapsodyUserNotFoundError)
-      RhapsodyVerifyJob.new.perform(user.id)
+      RhapsodyVerifyJob.perform(user.id)
 
       user.rhapsody_inactive?.should be_true
     end

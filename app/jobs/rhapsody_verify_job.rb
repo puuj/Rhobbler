@@ -9,7 +9,7 @@ class RhapsodyVerifyJob
   @retry_delay = 60
 
   # One job per user
-  def perform(user_id)
+  def self.perform(user_id)
     user = User.find(user_id)
 
     begin
