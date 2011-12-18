@@ -1,0 +1,34 @@
+body {
+  font-family: Verdana;
+  color: #111111;
+  margin: 0px;
+  font-size: 16px;
+}
+
+a, a:visited {
+  text-decoration: underline;
+  color: #333333;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+@mixin header-base {
+  font-weight: normal;
+  margin-top: 0px;
+  margin-bottom: 0.25em;
+}
+
+h1 {
+  @include header-base;
+  font-size: 3em;
+  letter-spacing: 3px;
+  color: #369;
+}
+
+h2 {
+  @include header-base;
+  font-size: 1.2em;
+}
+
