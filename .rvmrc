@@ -35,21 +35,3 @@ else
   fi
 fi
 
-#
-# If you use an RVM gemset file to install a list of gems (*.gems), you can have
-# it be automatically loaded. Uncomment the following and adjust the filename if
-# necessary.
-#
-# filename=".gems"
-# if [[ -s "$filename" ]]
-# then
-#   rvm gemset import "$filename" | grep -v already | grep -v listed | grep -v complete | sed '/^$/d'
-# fi
-
-# If you use bundler, this might be useful to you:
-if command -v bundle && [[ -s Gemfile ]]
-then
-  bundle
-fi
-
-
