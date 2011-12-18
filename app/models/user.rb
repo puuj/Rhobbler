@@ -14,8 +14,8 @@ class User < ActiveRecord::Base
   validates_uniqueness_of :rhapsody_username, :lastfm_username
 
   state_machine :rhapsody_state, :namespace => 'rhapsody', :initial => :inactive do
-    # After a user is signed up, attempt to verify their rhapsody username
-    after_transition :inactive => :unverified do |user|
+    # After a user is signed up or is otherwise unverified, attempt to verify their rhapsody username
+    after_transition [:inactive, :unauthorized, :verified] => :unverified do |user|
       RhapsodyVerifyJob.enqueue(user.id)
     end
 
@@ -25,7 +25,7 @@ class User < ActiveRecord::Base
     end
 
     event :activate do
-      transition :inactive => :unverified
+      transition [:inactive, :unauthorized, :verified] => :unverified
     end
 
     event :verify do

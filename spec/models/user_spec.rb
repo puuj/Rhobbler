@@ -106,12 +106,34 @@ describe User do
 
     describe "transitions" do
       describe "activate" do
-        let(:user) { Factory(:user, :rhapsody_state => "inactive") }
+        describe "as inactive user" do
+          let(:user) { Factory(:user, :rhapsody_state => "inactive") }
 
-        it "should move to unverified and queue a RhapsodyVerifyJob" do
-          RhapsodyVerifyJob.should_receive(:enqueue).once.with(user.id)
-          user.activate_rhapsody!
-          user.rhapsody_state.should == "unverified"
+          it "should move to unverified and queue a RhapsodyVerifyJob" do
+            RhapsodyVerifyJob.should_receive(:enqueue).once.with(user.id)
+            user.activate_rhapsody!
+            user.rhapsody_state.should == "unverified"
+          end
+        end
+
+        describe "as unauthorized user" do
+          let(:user) { Factory(:user, :rhapsody_state => "unauthorized") }
+
+          it "should move to unverified and queue a RhapsodyVerifyJob" do
+            RhapsodyVerifyJob.should_receive(:enqueue).once.with(user.id)
+            user.activate_rhapsody!
+            user.rhapsody_state.should == "unverified"
+          end
+        end
+
+        describe "as verified user" do
+          let(:user) { Factory(:user, :rhapsody_state => "verified") }
+
+          it "should move to unverified and queue a RhapsodyVerifyJob" do
+            RhapsodyVerifyJob.should_receive(:enqueue).once.with(user.id)
+            user.activate_rhapsody!
+            user.rhapsody_state.should == "unverified"
+          end
         end
       end
 
