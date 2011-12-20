@@ -8,7 +8,7 @@ class LastfmSubmissionJob
     track = Rockstar::Track.new(listen.artist, listen.title)
     begin
       # Will raise error if lastfm fails
-      status = track.scrobble(Time.now, listen.user.session_key)
+      status = track.scrobble(listen.played_at, listen.user.session_key)
 
       # Change the listen's status to submitted
       listen.submit!

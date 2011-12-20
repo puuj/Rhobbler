@@ -10,20 +10,15 @@ describe LastfmSubmissionJob do
     let(:listen) { Factory(:listen, :user => user) }
 
     before(:each) do
-      Timecop.freeze(Time.now)
       track_mock = mock(Rockstar::Track)
       track_mock.should_receive(:scrobble).
-        once.with(Time.now, user.session_key).
+        once.with(listen.played_at, user.session_key).
         and_return("success")
 
       Rockstar::Track.
         should_receive(:new).
         once.with(listen.artist, listen.title).
         and_return(track_mock)
-    end
-
-    after(:each) do
-      Timecop.return
     end
 
     it "should attempt to scrobble" do
