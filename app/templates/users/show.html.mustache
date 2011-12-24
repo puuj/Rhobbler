@@ -1,6 +1,6 @@
 {{#user}}
 <h2>Rhapsody Connection</h2>
-<div id="rhapsody_state" class="{{rhapsody_state}}">
+<section id="rhapsody_state" class="{{rhapsody_state}}">
   {{#rhapsody_unverified?}}
     We are currently attempting to connect to <b>{{rhapsody_username}}</b>'s listening history. Please wait...
   {{/rhapsody_unverified?}}
@@ -19,17 +19,17 @@
     Please copy the member ID as shown
     {{{instruction_image_3}}}
     and paste it here:
-    <form action='{{form_action}}' method='POST'>
+    <form method='POST'>
       <input type='hidden' name='_method' value='PUT' />
       <input type='hidden' name='user[rhapsody_state]' value='unverified' />
       <input type='text'   name='user[rhapsody_username]' id='user_rhapsody_username' />
       <input type='submit' value='Try Again' />
     </form>
   {{/rhapsody_inactive?}}
-</div>
+</section>
 
 <h2>Last.fm Connection</h2>
-<div id="lastfm_state" class="{{lastfm_state}}">
+<section id="lastfm_state" class="{{lastfm_state}}">
   {{#lastfm_unverified?}}
     We are currently attempting to connect to <b>{{lastfm_username}}</b>'s Last.fm profile. Please wait...
   {{/lastfm_unverified?}}
@@ -39,12 +39,22 @@
   {{/lastfm_verified?}}
 
   {{#lastfm_unauthorized?}}
-    {{> lastfm_reauthorize}}
+    {{> lastfm_authorize}}
   {{/lastfm_unauthorized?}}
 
   {{#lastfm_inactive?}}
-    {{> lastfm_reauthorize}}
+    {{> lastfm_authorize}}
   {{/lastfm_inactive?}}
-</div>
+</section>
 {{/user}}
 
+
+<h2>Recent Scrobbles</h2>
+<section id="recent_scrobbles">
+  {{#recent_scrobbles}}
+    <div class="scrobble">
+      <div>{{artist}} - {{title}}</div>
+      <time>{{date}}</time>
+    </div>
+  {{/recent_scrobbles}}
+</section>

@@ -1,8 +1,4 @@
 class ApplicationController < ActionController::Base
-  append_view_path Rails.root.join 'app', 'templates'
-  def default_url_options
-    {:host => "rhobbler.com"}
-  end
   protect_from_forgery
 
 private

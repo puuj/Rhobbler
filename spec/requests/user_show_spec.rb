@@ -66,6 +66,22 @@ describe "UserShow" do
       lastfm_segment.should have_content @user.lastfm_username
       lastfm_segment.should have_content "We are connected"
     end
+
+    describe "with already scrobbled tracks" do
+      before(:each) do
+        @user.update_attribute(:rhapsody_state, 'verified')
+        @listen = Factory.create(:listen,
+          :user_id => @user.id,
+          :submitted => true
+        )
+      end
+
+      it "displays scrobble data" do
+        visit user_path(@user)
+        page.should have_content(@listen.artist)
+        page.should have_content(@listen.title)
+      end
+    end
   end
 
   describe "for a unverified last.fm state" do
@@ -89,7 +105,7 @@ describe "UserShow" do
     it "displays a link to last.fm to reauthorize" do
       visit user_path(@user)
       lastfm_segment = page.find("#lastfm_state")
-      lastfm_segment.should have_selector('a[href*="last.fm"]')
+      lastfm_segment.should have_link("go to last.fm")
     end
   end
 
@@ -101,30 +117,15 @@ describe "UserShow" do
     it "displays a link to last.fm to reauthorize" do
       visit user_path(@user)
       lastfm_segment = page.find("#lastfm_state")
-      lastfm_segment.should have_selector('a[href*="last.fm"]')
+      lastfm_segment.should have_link("go to last.fm")
     end
   end
 
-  def signup_with(options)
-    @token = "ATOKEN"
-    Rockstar::Auth.any_instance.
-      stub(:token).
-      and_return(@token)
+  def signup_with(options={})
+    mock_session
+    mock_token
 
-    mock_session = mock(Rockstar::Session)
-    mock_session.
-      should_receive(:key).
-      and_return("ASESSIONKEY")
-    mock_session.
-      should_receive(:username).
-      at_least(1).times.
-      and_return("AUSERNAME")
-    Rockstar::Auth.any_instance.
-      stub(:session).
-      with(@token).
-      and_return(mock_session)
-
-    visit new_user_path(:token => @token)
+    visit new_user_path(:token => "ATOKEN")
     fill_in "user_rhapsody_username", :with => "ARHAPSODYUSERNAME"
     click_button "Start Rhobbler!"
 

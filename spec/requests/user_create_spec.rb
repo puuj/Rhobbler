@@ -5,7 +5,7 @@ describe "UserCreate" do
     before(:each) do
       mock_session = mock(Rockstar::Session)
       mock_session.should_receive(:key).and_return("ASESSIONKEY")
-      mock_session.should_receive(:username).twice.and_return("AUSERNAME")
+      mock_session.should_receive(:username).exactly(3).times.and_return("AUSERNAME")
       Rockstar::Auth.any_instance.stub(:session).with("ATOKEN").and_return(mock_session)
       Rockstar::Auth.any_instance.stub(:token).and_return("ATOKEN")
     end
