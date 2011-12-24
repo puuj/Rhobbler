@@ -14,6 +14,7 @@ gem 'rockstar'
 gem 'state_machine'
 
 group :assets do
+  gem 'mustang'
   gem 'sass-rails', "3.2.2"
 end
 
