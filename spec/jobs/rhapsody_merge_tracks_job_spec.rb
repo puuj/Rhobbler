@@ -38,25 +38,25 @@ describe RhapsodyMergeTracksJob do
     end
 
     describe "with a single track" do
-      let(:listens) { ["I AM NOT EMPTY"] }
+      let(:listen) { Factory.build(:listen).attributes }
 
       before(:each) do
         Rhapsody.
           should_receive(:fetch_listening_history).
           once.with(user.rhapsody_username).
-          and_return(listens)
+          and_return([listen])
       end
 
-      it "should call user.merge_listens" do
-        user.should_receive(:merge_listens).
-          once.with(listens).
+      it "should call Listen.create" do
+        Listen.should_receive(:create).
+          once.with(listen.merge(:user_id => user.id), {}).
           and_return(true)
 
         RhapsodyMergeTracksJob.perform(user.id)
       end
 
       it "should add an item to the delayed queue 10 minutes from now" do
-        user.stub(:merge_listens)
+        Listen.stub(:create)
 
         Timecop.freeze do
           RhapsodyMergeTracksJob.perform(user.id)

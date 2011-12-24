@@ -80,32 +80,5 @@ class User < ActiveRecord::Base
     # User with an unathorized last.fm listening history
     state :unauthorized
   end
-
-  # Find (for login) or create (for registration) by a session token passed from last.fm
-  def self.find_or_create_by_token(token)
-    session = Rockstar::Auth.new.session(token)
-
-    # There's a minor risk of a race condition here, but that's OK I think
-    if user = User.where(:lastfm_username => session.username).first
-      user.session_key = session.key
-      user.save
-    else
-      user = User.create(
-        :lastfm_username => session.username,
-        :session_key     => session.key
-      )
-    end
-
-    return user
-  end
-
-  # Takes an array of hahses of listen data (from Rhapsody module) and creates
-  # Listen records accordingly
-  def merge_listens(listens)
-    listens.each do |listen|
-      listen[:user_id] = id
-      Listen.find_or_create_by_user_id_and_track_id_and_played_at(listen)
-    end
-  end
 end
 
