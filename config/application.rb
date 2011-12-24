@@ -54,3 +54,4 @@ module Rhobbler2
     config.autoload_paths += %W(#{config.root}/app/views)
   end
 end
+
